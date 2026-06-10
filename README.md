@@ -143,6 +143,9 @@ export ANTHROPIC_API_KEY=your-key-here
 ## Usage
 
 ```bash
+# Web UI (recommended)
+streamlit run app/streamlit_app.py
+
 # Interactive CLI
 python -m agent.orchestrator
 
@@ -217,7 +220,7 @@ The orchestrator follows the analyst skill's 6-step workflow for every question:
 - [x] Phase 2: Semantic Layer — 13 YAML metric definitions, dimensions, segments, SQL compiler
 - [x] Phase 3: Skills — Analyst playbook, knowledge routing, 4 domain reference docs
 - [x] Phase 4: Agent + Validation — Orchestrator, adversarial review, 52-case eval suite, CI
-- [ ] Phase 5: UI + Polish — Streamlit app with reasoning trace and provenance
+- [x] Phase 5: UI + Polish — Streamlit app with reasoning trace, SQL display, and provenance
 
 ## Tech Stack
 
