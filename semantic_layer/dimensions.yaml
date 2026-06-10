@@ -1,0 +1,75 @@
+dimensions:
+  # ── Security Dimensions ────────────────────────────────────────────────
+
+  ticker:
+    description: "Unique identifier for a security or index"
+    table: dim_securities
+    column: ticker
+    notes: "Oslo Bors tickers end with .OL suffix. Index tickers start with ^."
+
+  security_type:
+    description: "Classification of the instrument: 'equity' or 'index'"
+    table: dim_securities
+    column: security_type
+    values: [equity, index]
+    notes: "Use this to filter out indices when a query asks about 'stocks' or 'companies'. Indices have no sector, industry, or meaningful volume."
+
+  sector:
+    description: "GICS sector classification"
+    table: dim_securities
+    column: sector
+    notes: "NULL for indices. Sourced from yfinance metadata."
+
+  industry:
+    description: "GICS industry classification (more granular than sector)"
+    table: dim_securities
+    column: industry
+    notes: "NULL for indices."
+
+  exchange:
+    description: "Exchange where the security trades"
+    table: dim_securities
+    column: exchange
+    values: [NMS, NYQ, OSE, US]
+    notes: "NMS = Nasdaq, NYQ = NYSE, OSE = Oslo Stock Exchange, US = US indices. Used to join with dim_calendar for exchange-specific trading days."
+
+  currency:
+    description: "Trading currency of the security"
+    table: dim_securities
+    column: currency
+    values: [USD, NOK]
+    notes: "CRITICAL: Do not compare price-denominated metrics (price_range, vwap) across currencies without explicit conversion. Return metrics (ratios) are comparable across currencies."
+
+  country:
+    description: "Country where the company is headquartered"
+    table: dim_securities
+    column: country
+
+  # ── Time Dimensions ────────────────────────────────────────────────────
+
+  date:
+    description: "Trading date"
+    table: fact_daily_prices
+    column: date
+    notes: "Not all dates are trading days for all exchanges. US and Oslo Bors have different holiday calendars."
+
+  year:
+    description: "Calendar year"
+    table: dim_calendar
+    column: year
+
+  quarter:
+    description: "Calendar quarter (1-4)"
+    table: dim_calendar
+    column: quarter
+    notes: "Join dim_calendar on both date AND exchange to get exchange-specific trading days."
+
+  month:
+    description: "Calendar month (1-12)"
+    table: dim_calendar
+    column: month
+
+  day_of_week:
+    description: "Day of week (0=Monday through 6=Sunday)"
+    table: dim_calendar
+    column: day_of_week

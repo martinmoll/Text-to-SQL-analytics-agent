@@ -1,0 +1,60 @@
+segments:
+  # ── By Security Type ───────────────────────────────────────────────────
+
+  all_equities:
+    description: "All individual stocks (excludes indices)"
+    filter: "dim_securities.security_type = 'equity'"
+
+  all_indices:
+    description: "Market indices only (^GSPC, ^OEX, ^IXIC)"
+    filter: "dim_securities.security_type = 'index'"
+
+  # ── By Exchange / Geography ────────────────────────────────────────────
+
+  us_equities:
+    description: "US-listed stocks (Nasdaq + NYSE)"
+    filter: "dim_securities.security_type = 'equity' AND dim_securities.exchange IN ('NMS', 'NYQ')"
+
+  oslo_bors:
+    description: "Oslo Stock Exchange equities (.OL tickers)"
+    filter: "dim_securities.security_type = 'equity' AND dim_securities.exchange = 'OSE'"
+
+  nasdaq_stocks:
+    description: "Nasdaq-listed stocks"
+    filter: "dim_securities.security_type = 'equity' AND dim_securities.exchange = 'NMS'"
+
+  nyse_stocks:
+    description: "NYSE-listed stocks"
+    filter: "dim_securities.security_type = 'equity' AND dim_securities.exchange = 'NYQ'"
+
+  # ── By Sector ──────────────────────────────────────────────────────────
+
+  tech_stocks:
+    description: "Technology sector stocks"
+    filter: "dim_securities.sector = 'Technology'"
+
+  healthcare_stocks:
+    description: "Healthcare sector stocks"
+    filter: "dim_securities.sector = 'Healthcare'"
+
+  financial_stocks:
+    description: "Financial Services sector stocks"
+    filter: "dim_securities.sector = 'Financial Services'"
+
+  consumer_stocks:
+    description: "Consumer Defensive + Consumer Cyclical sectors"
+    filter: "dim_securities.sector IN ('Consumer Defensive', 'Consumer Cyclical')"
+
+  energy_stocks:
+    description: "Energy sector stocks"
+    filter: "dim_securities.sector = 'Energy'"
+
+  # ── By Currency ────────────────────────────────────────────────────────
+
+  usd_denominated:
+    description: "All securities trading in USD"
+    filter: "dim_securities.currency = 'USD'"
+
+  nok_denominated:
+    description: "All securities trading in NOK"
+    filter: "dim_securities.currency = 'NOK'"

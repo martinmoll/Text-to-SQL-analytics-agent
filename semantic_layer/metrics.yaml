@@ -1,0 +1,163 @@
+metrics:
+  # ── Daily Return Metrics ──────────────────────────────────────────────
+
+  daily_simple_return:
+    description: "Simple daily return: (close - prev_close) / prev_close"
+    table: fact_daily_prices
+    column: daily_simple_return
+    expression: null  # pre-computed column
+    unit: ratio
+    notes: "Uses adjusted close to account for splits/dividends. NULL for the first trading day per ticker."
+
+  daily_log_return:
+    description: "Log daily return: ln(close / prev_close)"
+    table: fact_daily_prices
+    column: daily_log_return
+    expression: null  # pre-computed column
+    unit: ratio
+    notes: "Preferred for multi-period aggregation due to additivity. NULL for the first trading day per ticker."
+
+  # ── Cumulative / Period Returns ────────────────────────────────────────
+
+  cumulative_return:
+    description: "Cumulative return over a date range: (end_price / start_price) - 1"
+    table: fact_daily_prices
+    expression: "(LAST(adjusted_close ORDER BY date) / FIRST(adjusted_close ORDER BY date)) - 1"
+    requires_group_by: [ticker]
+    requires_filter: [date_range]
+    unit: ratio
+    notes: "Always uses adjusted_close. Requires a date range filter. Compare only within the same currency."
+
+  total_return_index:
+    description: "Rebased cumulative growth of $1 invested, using log return additivity"
+    table: fact_daily_prices
+    expression: "EXP(SUM(fp.daily_log_return) OVER (PARTITION BY fp.ticker ORDER BY fp.date ROWS UNBOUNDED PRECEDING))"
+    unit: ratio
+    notes: "Useful for charting growth of a hypothetical investment over time."
+
+  # ── Volatility Metrics ────────────────────────────────────────────────
+
+  annualized_volatility:
+    description: "Annualized volatility from daily log returns over a trailing window"
+    table: fact_daily_prices
+    expression: "STDDEV(daily_log_return) * SQRT(252)"
+    requires_group_by: [ticker]
+    requires_filter: [date_range]
+    default_window: "252 trading days"
+    unit: ratio
+    notes: "Uses 252 trading days/year convention. Compute over the requested window, not all-time."
+
+  # ── Risk-Adjusted Metrics ─────────────────────────────────────────────
+
+  sharpe_ratio:
+    description: "Annualized excess return over risk-free rate, divided by annualized volatility"
+    table: fact_daily_prices
+    expression: |
+      (AVG(daily_log_return) * 252 - {risk_free_rate})
+      / (STDDEV(daily_log_return) * SQRT(252))
+    requires_group_by: [ticker]
+    requires_filter: [date_range]
+    parameters:
+      risk_free_rate:
+        description: "Annualized risk-free rate as a decimal (e.g. 0.05 for 5%)"
+        default: 0.05
+    unit: ratio
+    notes: "ALWAYS clarify: is the user asking for ex-ante or ex-post Sharpe? This computes ex-post. Default risk-free rate is 5% — confirm with the user or use current 3-month US Treasury yield."
+
+  sortino_ratio:
+    description: "Like Sharpe but penalizes only downside volatility"
+    table: fact_daily_prices
+    expression: |
+      (AVG(daily_log_return) * 252 - {risk_free_rate})
+      / (SQRT(AVG(CASE WHEN daily_log_return < 0 THEN daily_log_return * daily_log_return ELSE 0 END)) * SQRT(252))
+    requires_group_by: [ticker]
+    requires_filter: [date_range]
+    parameters:
+      risk_free_rate:
+        description: "Annualized risk-free rate as a decimal"
+        default: 0.05
+    unit: ratio
+    notes: "Uses downside deviation (only negative returns) in the denominator."
+
+  # ── Drawdown Metrics ──────────────────────────────────────────────────
+
+  max_drawdown:
+    description: "Maximum peak-to-trough decline over a period"
+    table: fact_daily_prices
+    compile_mode: cte
+    cte_sql: |
+      WITH running_max AS (
+        SELECT
+          fp.ticker,
+          fp.date,
+          fp.adjusted_close,
+          MAX(fp.adjusted_close) OVER (PARTITION BY fp.ticker ORDER BY fp.date ROWS UNBOUNDED PRECEDING) AS peak
+        FROM fact_daily_prices fp
+        {join_clause}
+        {where_clause}
+      )
+      SELECT
+        ticker,
+        MIN(adjusted_close / peak - 1) AS max_drawdown
+      FROM running_max
+      GROUP BY ticker
+      ORDER BY ticker
+    requires_group_by: [ticker]
+    requires_filter: [date_range]
+    unit: ratio
+    notes: "Returns a negative number. E.g. -0.25 means a 25% drawdown from peak."
+
+  # ── Market Correlation Metrics ─────────────────────────────────────────
+
+  beta:
+    description: "CAPM beta: covariance of asset returns with market returns / variance of market returns"
+    table: fact_daily_prices
+    expression: |
+      REGR_SLOPE(asset.daily_log_return, market.daily_log_return)
+    requires_join: "Self-join fact_daily_prices: asset ticker vs market benchmark on matching dates"
+    requires_group_by: [ticker]
+    requires_filter: [date_range]
+    parameters:
+      market_benchmark:
+        description: "Market index ticker for beta calculation"
+        default: "^GSPC"
+    unit: ratio
+    notes: "Default benchmark is S&P 500 (^GSPC). For Oslo Bors stocks, user may want OSEBX. Always confirm. Uses OLS regression slope."
+
+  correlation:
+    description: "Pearson correlation of daily log returns between two tickers"
+    table: fact_daily_prices
+    expression: "CORR(a.daily_log_return, b.daily_log_return)"
+    requires_join: "Self-join fact_daily_prices on matching dates for two tickers"
+    requires_filter: [date_range]
+    unit: ratio
+    notes: "Ranges from -1 to +1. Requires two tickers and matching dates."
+
+  # ── Price & Volume Metrics ─────────────────────────────────────────────
+
+  average_daily_volume:
+    description: "Average daily trading volume over a period"
+    table: fact_daily_prices
+    expression: "AVG(volume)"
+    requires_group_by: [ticker]
+    requires_filter: [date_range]
+    unit: shares
+    notes: "Volume is not meaningful for index tickers (security_type = 'index')."
+
+  price_range:
+    description: "High minus low for the period"
+    table: fact_daily_prices
+    expression: "MAX(high) - MIN(low)"
+    requires_group_by: [ticker]
+    requires_filter: [date_range]
+    unit: price
+    notes: "Currency depends on the ticker. Do not compare across currencies without conversion."
+
+  vwap:
+    description: "Volume-weighted average price over a period"
+    table: fact_daily_prices
+    expression: "SUM(adjusted_close * volume) / NULLIF(SUM(volume), 0)"
+    requires_group_by: [ticker]
+    requires_filter: [date_range]
+    unit: price
+    notes: "Approximation using daily close * volume. Not meaningful for indices."
