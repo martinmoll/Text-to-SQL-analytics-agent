@@ -39,6 +39,87 @@ An agentic text-to-SQL system for financial market data that implements the 4-la
 └──────────────────────────────────────────────────────────────┘
 ```
 
+## How It Works
+
+Raw LLMs writing SQL get the answer wrong ~79% of the time. Anthropic identified three failure modes responsible for almost all errors, and this project solves each with a dedicated layer:
+
+| Failure Mode | What Goes Wrong | Solution |
+|---|---|---|
+| **Concept ambiguity** | "Returns" could mean simple, log, cumulative, or annualized — the LLM picks the wrong one | **Semantic layer** with 13 governed metric definitions, each with exactly one canonical SQL expression |
+| **Retrieval failure** | The right table exists but the LLM doesn't find it among dozens of options | **Skills** (markdown playbooks) that narrow the search to a handful of curated reference docs per domain |
+| **Unchecked errors** | Wrong joins, missing filters, currency mixing, NULL edge cases | **Adversarial reviewer** that checks every query against 9 common error types before execution |
+
+### Walkthrough: What Happens When You Ask a Question
+
+```
+You: "What was EQNR.OL's cumulative return in Q3 2024?"
+```
+
+**Step 1 — CLARIFY:** Claude interprets the question — ticker: EQNR.OL, metric: cumulative return, period: Q3 2024 (Jul 1 - Sep 30).
+
+**Step 2 — RESOLVE:** The semantic resolver matches "cumulative return" to the governed `cumulative_return` metric in `metrics.yaml`. The YAML-to-SQL compiler produces:
+```sql
+SELECT fp.ticker,
+    (LAST(adjusted_close ORDER BY date) / FIRST(adjusted_close ORDER BY date)) - 1 AS value
+FROM fact_daily_prices fp
+WHERE fp.ticker IN ('EQNR.OL')
+  AND fp.date >= '2024-07-01' AND fp.date <= '2024-09-30'
+GROUP BY fp.ticker
+```
+The LLM never invents the formula — it comes from the governed definition.
+
+**Step 3 — REVIEW:** The adversarial reviewer catches that `LAST()` is used without an `IS NOT NULL` filter. This matters because Oslo Bors tickers can have NULL adjusted_close on partial trading days. It adds `AND fp.adjusted_close IS NOT NULL`.
+
+**Step 4 — EXECUTE & DELIVER:** The query runs against DuckDB and the result is formatted with a provenance footer:
+
+```
+Answer:  EQNR.OL cumulative return: -8.23%
+Source:  fact_daily_prices
+Currency: NOK
+Review:  Revised — added NULL price filter for Oslo Bors ticker
+```
+
+For questions the semantic layer *doesn't* cover (e.g., "build a correlation matrix for 5 tech stocks"), the agent falls through to Claude-powered SQL generation, guided by the domain-specific reference docs from the skills layer.
+
+### Project Structure
+
+```
+├── data/                          # Layer 1: Data Foundations
+│   ├── ingestion/
+│   │   ├── ingest_prices.py       #   yfinance → DuckDB (24 tickers, 5 years)
+│   │   └── quality_checks.py      #   Freshness, completeness, anomaly checks
+│   └── warehouse.duckdb           #   DuckDB warehouse (gitignored, built by ingestion)
+│
+├── semantic_layer/                # Layer 2: Sources of Truth
+│   ├── metrics.yaml               #   13 governed metric definitions
+│   ├── dimensions.yaml            #   Security + time dimensions
+│   ├── segments.yaml              #   Named filters (us_equities, tech_stocks, ...)
+│   └── compiler.py                #   YAML → executable DuckDB SQL
+│
+├── skills/                        # Layer 3: Skills
+│   ├── knowledge.md               #   Router: question domain → reference doc
+│   ├── analyst.md                 #   6-step procedural playbook
+│   └── references/                #   Domain-specific guides with gotchas + SQL patterns
+│       ├── returns_and_risk.md
+│       ├── portfolio_analytics.md
+│       ├── market_overview.md
+│       └── fundamentals.md
+│
+├── agent/                         # Layer 4: Agent + Validation
+│   ├── orchestrator.py            #   Main pipeline: clarify → resolve → query → review → deliver
+│   ├── semantic_resolver.py       #   NL question → governed metric + compiled SQL
+│   ├── sql_generator.py           #   Claude-powered SQL for complex questions
+│   ├── reviewer.py                #   Adversarial review (5 static + 9 LLM checks)
+│   └── response_formatter.py      #   Provenance footer + structured output
+│
+├── evals/                         # Offline Eval Suite
+│   ├── fixtures/                  #   52 Q&A test cases across 5 domains
+│   ├── run_evals.py               #   Eval runner (metric resolution + SQL correctness)
+│   └── ablation.py                #   A/B testing for skill changes
+│
+└── .github/workflows/eval_ci.yml  # CI: runs evals on every PR, blocks on regressions
+```
+
 ## Setup
 
 ```bash
