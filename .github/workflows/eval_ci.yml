@@ -1,0 +1,77 @@
+name: Eval Suite
+
+on:
+  pull_request:
+    paths:
+      - 'skills/**'
+      - 'semantic_layer/**'
+      - 'data/models/**'
+      - 'agent/**'
+      - 'evals/**'
+
+jobs:
+  eval-resolution:
+    name: Semantic Resolution Evals
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pyyaml pandas
+
+      - name: Run resolution-only evals
+        run: python -m evals.run_evals --no-llm --verbose --save
+
+      - name: Upload eval results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-results-resolution
+          path: evals/results/
+
+  eval-full:
+    name: Full Agent Evals
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install duckdb yfinance anthropic pandas pyyaml
+
+      - name: Ingest test data
+        run: python data/ingestion/ingest_prices.py
+
+      - name: Run full evals
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python -m evals.run_evals --verbose --save
+
+      - name: Upload eval results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-results-full
+          path: evals/results/
+
+      - name: Check for regressions
+        if: hashFiles('evals/results/eval_*.json') != ''
+        run: |
+          RESULT_COUNT=$(ls evals/results/eval_*.json 2>/dev/null | wc -l)
+          if [ "$RESULT_COUNT" -ge 2 ]; then
+            python -m evals.ablation --fail-on-regression
+          else
+            echo "Not enough result files for ablation comparison — skipping"
+          fi

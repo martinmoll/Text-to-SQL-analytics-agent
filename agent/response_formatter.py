@@ -1,0 +1,266 @@
+"""
+Response formatter: structures the agent's output with answer, methodology,
+SQL, data table, and provenance footer.
+
+The provenance footer includes source tables, data freshness, currency,
+and coverage — following the analyst skill's Step 6 requirements.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from datetime import date
+
+import pandas as pd
+
+
+@dataclass
+class Provenance:
+    source_tables: list[str]
+    data_freshness: str | None = None
+    currency: str | None = None
+    coverage: str | None = None
+    metric_source: str = "semantic_layer"
+    review_summary: str | None = None
+
+
+@dataclass
+class AgentResponse:
+    question: str
+    answer: str
+    methodology: str
+    sql: str
+    data: pd.DataFrame | None = None
+    provenance: Provenance | None = None
+    warnings: list[str] = field(default_factory=list)
+    trace: list[dict] = field(default_factory=list)
+
+    def to_markdown(self) -> str:
+        sections = [f"## Answer\n\n{self.answer}"]
+
+        sections.append(f"\n## Methodology\n\n{self.methodology}")
+
+        sections.append(f"\n## SQL\n\n```sql\n{self.sql}\n```")
+
+        if self.data is not None and not self.data.empty:
+            sections.append(f"\n## Results\n\n{_dataframe_to_markdown(self.data)}")
+
+        if self.warnings:
+            items = "\n".join(f"- {w}" for w in self.warnings)
+            sections.append(f"\n## Warnings\n\n{items}")
+
+        if self.provenance:
+            sections.append(f"\n---\n{_format_provenance(self.provenance)}")
+
+        return "\n".join(sections)
+
+    def to_dict(self) -> dict:
+        return {
+            "question": self.question,
+            "answer": self.answer,
+            "methodology": self.methodology,
+            "sql": self.sql,
+            "data": self.data.to_dict(orient="records") if self.data is not None else None,
+            "warnings": self.warnings,
+            "provenance": {
+                "source_tables": self.provenance.source_tables,
+                "data_freshness": self.provenance.data_freshness,
+                "currency": self.provenance.currency,
+                "coverage": self.provenance.coverage,
+                "metric_source": self.provenance.metric_source,
+                "review_summary": self.provenance.review_summary,
+            } if self.provenance else None,
+            "trace": self.trace,
+        }
+
+
+class ResponseFormatter:
+    def format(
+        self,
+        question: str,
+        sql: str,
+        result_df: pd.DataFrame | None,
+        metric_source: str,
+        tables_used: list[str],
+        review_summary: str | None = None,
+        warnings: list[str] | None = None,
+        reasoning: str | None = None,
+        metric_name: str | None = None,
+        metric_description: str | None = None,
+        metric_notes: str | None = None,
+        trace: list[dict] | None = None,
+    ) -> AgentResponse:
+        answer = self._generate_answer(result_df, question, metric_name)
+        methodology = self._generate_methodology(
+            metric_source, metric_name, metric_description, metric_notes, reasoning
+        )
+        provenance = self._build_provenance(
+            tables_used, result_df, metric_source, review_summary
+        )
+
+        return AgentResponse(
+            question=question,
+            answer=answer,
+            methodology=methodology,
+            sql=sql,
+            data=result_df,
+            provenance=provenance,
+            warnings=warnings or [],
+            trace=trace or [],
+        )
+
+    def _generate_answer(
+        self,
+        df: pd.DataFrame | None,
+        question: str,
+        metric_name: str | None,
+    ) -> str:
+        if df is None or df.empty:
+            return "No data returned for this query."
+
+        if len(df) == 1 and len(df.columns) <= 3:
+            row = df.iloc[0]
+            parts = []
+            for col in df.columns:
+                val = row[col]
+                parts.append(f"{col}: {_format_value(val)}")
+            return " | ".join(parts)
+
+        if "ticker" in df.columns:
+            n = len(df["ticker"].unique())
+            return f"Results for {n} ticker(s) — see data table below."
+
+        return f"Query returned {len(df)} row(s) — see data table below."
+
+    def _generate_methodology(
+        self,
+        metric_source: str,
+        metric_name: str | None,
+        metric_description: str | None,
+        metric_notes: str | None,
+        reasoning: str | None,
+    ) -> str:
+        parts = []
+
+        if metric_source == "semantic_layer" and metric_name:
+            parts.append(
+                f"Used governed metric **{metric_name}** from the semantic layer."
+            )
+            if metric_description:
+                parts.append(f"Definition: {metric_description}")
+        elif metric_source == "llm_generated":
+            parts.append("SQL generated by the LLM agent (semantic layer had no direct coverage).")
+        else:
+            parts.append(f"Source: {metric_source}")
+
+        if metric_notes:
+            parts.append(f"Note: {metric_notes}")
+
+        if reasoning:
+            parts.append(f"Reasoning: {reasoning}")
+
+        return " ".join(parts)
+
+    def _build_provenance(
+        self,
+        tables_used: list[str],
+        result_df: pd.DataFrame | None,
+        metric_source: str,
+        review_summary: str | None,
+    ) -> Provenance:
+        freshness = None
+        if result_df is not None and "date" in result_df.columns:
+            max_date = result_df["date"].max()
+            if max_date is not None:
+                freshness = str(max_date)
+
+        currency = _detect_currency(result_df, tables_used)
+        coverage = _detect_coverage(result_df)
+
+        return Provenance(
+            source_tables=tables_used,
+            data_freshness=freshness,
+            currency=currency,
+            coverage=coverage,
+            metric_source=metric_source,
+            review_summary=review_summary,
+        )
+
+
+def _format_provenance(p: Provenance) -> str:
+    lines = ["**Provenance**"]
+    lines.append(f"- **Source:** {', '.join(p.source_tables)}")
+    if p.data_freshness:
+        lines.append(f"- **Data freshness:** {p.data_freshness}")
+    if p.currency:
+        lines.append(f"- **Currency:** {p.currency}")
+    if p.coverage:
+        lines.append(f"- **Coverage:** {p.coverage}")
+    lines.append(f"- **Metric source:** {p.metric_source}")
+    if p.review_summary:
+        lines.append(f"- **Review:** {p.review_summary}")
+    return "\n".join(lines)
+
+
+def _dataframe_to_markdown(df: pd.DataFrame, max_rows: int = 50) -> str:
+    display_df = df.head(max_rows).copy()
+    for col in display_df.columns:
+        display_df[col] = display_df[col].apply(_format_value)
+
+    header = "| " + " | ".join(str(c) for c in display_df.columns) + " |"
+    separator = "| " + " | ".join("---" for _ in display_df.columns) + " |"
+    rows = []
+    for _, row in display_df.iterrows():
+        rows.append("| " + " | ".join(str(row[c]) for c in display_df.columns) + " |")
+
+    result = "\n".join([header, separator] + rows)
+    if len(df) > max_rows:
+        result += f"\n\n*Showing {max_rows} of {len(df)} rows.*"
+    return result
+
+
+def _format_value(val) -> str:
+    if pd.isna(val):
+        return "—"
+    if isinstance(val, float):
+        if abs(val) < 0.01 and val != 0:
+            return f"{val:.6f}"
+        if abs(val) < 10:
+            return f"{val:.4f}"
+        return f"{val:,.2f}"
+    if isinstance(val, date):
+        return str(val)
+    return str(val)
+
+
+def _detect_currency(df: pd.DataFrame | None, tables: list[str]) -> str | None:
+    if df is None:
+        return None
+    if "currency" in df.columns:
+        currencies = df["currency"].dropna().unique()
+        if len(currencies) == 1:
+            return str(currencies[0])
+        if len(currencies) > 1:
+            return "Mixed (" + ", ".join(str(c) for c in currencies) + ")"
+    if "ticker" in df.columns:
+        tickers = df["ticker"].unique()
+        has_ol = any(".OL" in str(t) for t in tickers)
+        has_us = any(".OL" not in str(t) and not str(t).startswith("^") for t in tickers)
+        if has_ol and has_us:
+            return "Mixed (USD, NOK)"
+        if has_ol:
+            return "NOK"
+        if has_us:
+            return "USD"
+    return None
+
+
+def _detect_coverage(df: pd.DataFrame | None) -> str | None:
+    if df is None:
+        return None
+    if "ticker" in df.columns:
+        tickers = sorted(df["ticker"].unique())
+        if len(tickers) <= 10:
+            return ", ".join(str(t) for t in tickers)
+        return f"{len(tickers)} tickers"
+    return f"{len(df)} rows"

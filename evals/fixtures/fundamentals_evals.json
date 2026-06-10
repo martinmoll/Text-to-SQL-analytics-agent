@@ -1,0 +1,67 @@
+[
+  {
+    "id": "fund_01",
+    "question": "What is AAPL's P/E ratio?",
+    "expected_metric": null,
+    "expected_table": null,
+    "expected_filters": {},
+    "sql_must_contain": [],
+    "sql_must_not_contain": ["fact_fundamentals"],
+    "ground_truth": null,
+    "tolerance": null,
+    "expected_behavior": "agent_should_explain_data_not_available",
+    "tags": ["fundamentals", "not_available"]
+  },
+  {
+    "id": "fund_02",
+    "question": "Compare MSFT and GOOGL on EV/EBITDA",
+    "expected_metric": null,
+    "expected_table": null,
+    "expected_filters": {},
+    "sql_must_contain": [],
+    "sql_must_not_contain": ["fact_fundamentals"],
+    "ground_truth": null,
+    "tolerance": null,
+    "expected_behavior": "agent_should_explain_data_not_available",
+    "tags": ["fundamentals", "not_available"]
+  },
+  {
+    "id": "fund_03",
+    "question": "What is the dividend yield for JNJ?",
+    "expected_metric": null,
+    "expected_table": null,
+    "expected_filters": {},
+    "sql_must_contain": [],
+    "sql_must_not_contain": ["fact_fundamentals"],
+    "ground_truth": null,
+    "tolerance": null,
+    "expected_behavior": "agent_should_explain_data_not_available",
+    "tags": ["fundamentals", "not_available"]
+  },
+  {
+    "id": "fund_04",
+    "question": "Show me the revenue growth for AMZN over the last 3 years",
+    "expected_metric": null,
+    "expected_table": null,
+    "expected_filters": {},
+    "sql_must_contain": [],
+    "sql_must_not_contain": ["fact_fundamentals"],
+    "ground_truth": null,
+    "tolerance": null,
+    "expected_behavior": "agent_should_explain_data_not_available",
+    "tags": ["fundamentals", "not_available"]
+  },
+  {
+    "id": "fund_05",
+    "question": "Which stock has the lowest price-to-book ratio?",
+    "expected_metric": null,
+    "expected_table": null,
+    "expected_filters": {},
+    "sql_must_contain": [],
+    "sql_must_not_contain": ["fact_fundamentals"],
+    "ground_truth": null,
+    "tolerance": null,
+    "expected_behavior": "agent_should_explain_data_not_available",
+    "tags": ["fundamentals", "not_available"]
+  }
+]

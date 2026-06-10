@@ -1,0 +1,98 @@
+[
+  {
+    "id": "port_01",
+    "question": "How did AAPL perform relative to the S&P 500 in 2024?",
+    "expected_metric": null,
+    "expected_table": "fact_daily_prices",
+    "expected_filters": {"ticker": "AAPL", "date_range": ["2024-01-01", "2024-12-31"]},
+    "sql_must_contain": ["AAPL", "^GSPC", "adjusted_close"],
+    "sql_must_not_contain": [],
+    "ground_truth": null,
+    "tolerance": 0.01,
+    "tags": ["llm_generated", "relative_performance"]
+  },
+  {
+    "id": "port_02",
+    "question": "Which stocks outperformed the S&P 500 in 2024?",
+    "expected_metric": null,
+    "expected_table": "fact_daily_prices",
+    "expected_filters": {"date_range": ["2024-01-01", "2024-12-31"]},
+    "sql_must_contain": ["^GSPC", "adjusted_close", "security_type", "equity"],
+    "sql_must_not_contain": [],
+    "ground_truth": null,
+    "tolerance": null,
+    "tags": ["llm_generated", "relative_performance", "ranking"]
+  },
+  {
+    "id": "port_03",
+    "question": "What is the correlation between EQNR.OL and DNB.OL in 2024?",
+    "expected_metric": "correlation",
+    "expected_table": "fact_daily_prices",
+    "expected_filters": {"ticker": ["EQNR.OL", "DNB.OL"], "date_range": ["2024-01-01", "2024-12-31"]},
+    "sql_must_contain": ["CORR", "EQNR.OL", "DNB.OL", "daily_log_return"],
+    "sql_must_not_contain": [],
+    "ground_truth": null,
+    "tolerance": 0.02,
+    "tags": ["semantic_layer", "correlation", "oslo_bors"]
+  },
+  {
+    "id": "port_04",
+    "question": "Show me the most diversifying stock pair (lowest correlation) among US equities in 2024",
+    "expected_metric": null,
+    "expected_table": "fact_daily_prices",
+    "expected_filters": {"date_range": ["2024-01-01", "2024-12-31"]},
+    "sql_must_contain": ["CORR", "daily_log_return", "security_type", "equity"],
+    "sql_must_not_contain": [],
+    "ground_truth": null,
+    "tolerance": null,
+    "tags": ["llm_generated", "correlation_matrix", "ranking"]
+  },
+  {
+    "id": "port_05",
+    "question": "What is the beta of Oslo Bors stocks relative to the S&P 500 in 2024?",
+    "expected_metric": "beta",
+    "expected_table": "fact_daily_prices",
+    "expected_filters": {"date_range": ["2024-01-01", "2024-12-31"]},
+    "sql_must_contain": ["REGR_SLOPE", "^GSPC", ".OL"],
+    "sql_must_not_contain": [],
+    "ground_truth": null,
+    "tolerance": 0.05,
+    "tags": ["semantic_layer", "beta", "oslo_bors", "cross_exchange"]
+  },
+  {
+    "id": "port_06",
+    "question": "Compare the excess returns of tech stocks vs healthcare stocks over the S&P 500 in 2024",
+    "expected_metric": null,
+    "expected_table": "fact_daily_prices",
+    "expected_filters": {"date_range": ["2024-01-01", "2024-12-31"]},
+    "sql_must_contain": ["^GSPC", "sector", "adjusted_close"],
+    "sql_must_not_contain": [],
+    "ground_truth": null,
+    "tolerance": null,
+    "tags": ["llm_generated", "sector_comparison", "relative_performance"]
+  },
+  {
+    "id": "port_07",
+    "question": "What is the correlation between JPM and V in 2024?",
+    "expected_metric": "correlation",
+    "expected_table": "fact_daily_prices",
+    "expected_filters": {"ticker": ["JPM", "V"], "date_range": ["2024-01-01", "2024-12-31"]},
+    "sql_must_contain": ["CORR", "JPM", "daily_log_return"],
+    "sql_must_not_contain": [],
+    "ground_truth": null,
+    "tolerance": 0.02,
+    "tags": ["semantic_layer", "correlation", "financial_sector"]
+  },
+  {
+    "id": "port_08",
+    "question": "Rank all stocks by their risk-adjusted excess return over the S&P 500 in 2024",
+    "expected_metric": null,
+    "expected_table": "fact_daily_prices",
+    "expected_filters": {"date_range": ["2024-01-01", "2024-12-31"]},
+    "sql_must_contain": ["^GSPC", "security_type", "equity"],
+    "sql_must_not_contain": [],
+    "ground_truth": null,
+    "tolerance": null,
+    "tags": ["llm_generated", "ranking", "risk_adjusted"]
+  }
+]
