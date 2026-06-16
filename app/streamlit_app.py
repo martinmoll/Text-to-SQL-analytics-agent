@@ -55,6 +55,9 @@ def _render_trace(trace: list[dict]) -> None:
             if step_name == "clarify":
                 interpreted = step_data.get("interpreted", "")
                 metric_type = step_data.get("metric_type", "")
+                error = step_data.get("error")
+                if error:
+                    st.warning(f"LLM clarification unavailable: {error}")
                 if interpreted:
                     st.markdown(f"**Interpreted as:** {interpreted}")
                 if metric_type:

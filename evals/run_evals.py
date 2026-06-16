@@ -90,7 +90,7 @@ def load_fixtures(fixture_name: str | None = None, tags: list[str] | None = None
 
     for pattern in patterns:
         for path in FIXTURES_DIR.glob(pattern):
-            with open(path) as f:
+            with open(path, encoding="utf-8") as f:
                 data = json.load(f)
             for item in data:
                 case = EvalCase(
@@ -354,7 +354,7 @@ def save_results(results: list[EvalResult], output_path: Path | None = None) -> 
             "notes": r.notes,
         })
 
-    with open(output_path, "w") as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump({
             "timestamp": datetime.now().isoformat(),
             "total": len(results),

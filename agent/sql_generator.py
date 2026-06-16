@@ -89,7 +89,7 @@ def _load_reference(ref_path: str) -> str:
 
 
 class SQLGenerator:
-    def __init__(self, api_key: str | None = None, model: str = "claude-sonnet-4-20250514") -> None:
+    def __init__(self, api_key: str | None = None, model: str = "claude-sonnet-4-6") -> None:
         self.client = anthropic.Anthropic(api_key=api_key)
         self.model = model
         self.analyst_skill = _load_skill("analyst.md")

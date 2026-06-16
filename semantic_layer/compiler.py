@@ -34,7 +34,7 @@ class SemanticCompiler:
         self.segments = self._load_yaml(SEGMENTS_PATH).get("segments", {})
 
     def _load_yaml(self, path: Path) -> dict:
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             return yaml.safe_load(f)
 
     def list_metrics(self) -> list[dict]:

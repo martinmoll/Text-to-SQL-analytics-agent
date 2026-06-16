@@ -84,7 +84,7 @@ REVISED_SQL:
 
 
 class SQLReviewer:
-    def __init__(self, api_key: str | None = None, model: str = "claude-sonnet-4-20250514") -> None:
+    def __init__(self, api_key: str | None = None, model: str = "claude-sonnet-4-6") -> None:
         self.client = anthropic.Anthropic(api_key=api_key)
         self.model = model
 
@@ -191,10 +191,10 @@ class SQLReviewer:
                 messages=[{"role": "user", "content": user_prompt}],
             )
             return self._parse_llm_review(response.content[0].text)
-        except Exception:
+        except Exception as e:
             return ReviewResult(
                 passed=True,
-                summary="LLM review unavailable; static checks only",
+                summary=f"LLM review unavailable; static checks only. Reason: {e}",
             )
 
     def _parse_llm_review(self, text: str) -> ReviewResult:

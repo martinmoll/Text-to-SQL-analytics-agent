@@ -63,7 +63,7 @@ class AnalyticsAgent:
         self,
         db_path: str | Path | None = None,
         api_key: str | None = None,
-        model: str = "claude-sonnet-4-20250514",
+        model: str = "claude-sonnet-4-6",
         review_enabled: bool = True,
     ) -> None:
         self.db_path = Path(db_path) if db_path else DEFAULT_DB_PATH
@@ -87,6 +87,7 @@ class AnalyticsAgent:
             "step": "clarify",
             "interpreted": clarification.get("interpreted_question", question),
             "metric_type": clarification.get("metric_type"),
+            "error": clarification.get("clarify_error"),
         })
 
         if clarification.get("needs_clarification"):
@@ -229,8 +230,12 @@ class AnalyticsAgent:
             end = text.rfind("}") + 1
             if start >= 0 and end > start:
                 return json.loads(text[start:end])
-        except Exception:
-            pass
+        except Exception as e:
+            return {
+                "interpreted_question": question,
+                "needs_clarification": False,
+                "clarify_error": str(e),
+            }
         return {"interpreted_question": question, "needs_clarification": False}
 
     def _execute(self, sql: str) -> pd.DataFrame | None:
