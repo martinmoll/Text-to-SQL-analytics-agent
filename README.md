@@ -2,6 +2,8 @@
 
 An agentic text-to-SQL system for financial market data that implements the 4-layer analytics stack from [Anthropic's approach to agentic analytics](https://www.anthropic.com/engineering/analytics-with-claude). Takes natural language questions about stocks and markets, resolves them through a governed semantic layer and markdown skill files, generates SQL against a DuckDB warehouse, runs adversarial review, and returns answers with provenance footers.
 
+![Demo — Sharpe ratio query through the full agent pipeline](docs/demo.gif)
+
 ## Architecture
 
 ```

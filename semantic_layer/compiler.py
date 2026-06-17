@@ -111,6 +111,12 @@ class SemanticCompiler:
             if seg_filter:
                 where_parts.append(seg_filter)
 
+        # Guard FIRST/LAST ordered aggregates against NULL adjusted_close
+        # (Oslo Bors tickers can have NULLs on partial trading days)
+        expr_upper = (select_expr or "").upper()
+        if ("FIRST(" in expr_upper or "LAST(" in expr_upper) and "ADJUSTED_CLOSE" in expr_upper:
+            where_parts.append("fp.adjusted_close IS NOT NULL")
+
         where_clause = ""
         if where_parts:
             where_clause = "WHERE " + " AND ".join(where_parts)
