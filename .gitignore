@@ -21,3 +21,8 @@ Thumbs.db
 
 # Environment
 .env
+
+# Personal application documents
+docs/*.tex
+docs/*.pdf
+!docs/demo.gif
