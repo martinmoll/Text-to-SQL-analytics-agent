@@ -134,7 +134,7 @@ For questions the semantic layer *doesn't* cover (e.g., "build a correlation mat
 │
 ├── tests/                         # 146 pytest tests (no API key needed)
 │
-└── .github/workflows/eval_ci.yml  # CI: runs evals on every PR, blocks on regressions
+└── .github/workflows/eval_ci.yml  # CI: tests + deterministic evals on every push; full evals on demand
 ```
 
 ## Setup
@@ -236,7 +236,7 @@ The Oslo Bors tickers are included deliberately: they force multi-currency (USD/
 | Market Overview | 12 | Index performance, sector averages, market breadth |
 | Fundamentals | 5 | Correctly handles "data not available" |
 
-Results over time are logged in [`evals/EVAL_TIMELINE.md`](evals/EVAL_TIMELINE.md). CI runs the free resolution-only evals on every PR touching the semantic layer, skills, or agent code, and full evals (with ablation regression checks) for non-draft PRs.
+Results over time are logged in [`evals/EVAL_TIMELINE.md`](evals/EVAL_TIMELINE.md). CI is two-tier by design: the deterministic tier (146 unit tests + resolution-only evals, gated against the committed `resolution_baseline.json`) runs free on every push and PR, so a red X always means a real break. The LLM tier (full agent evals with ablation regression checks against the latest committed result file) costs API credits and has sampling variance, so it is triggered manually from the GitHub Actions tab and requires the `ANTHROPIC_API_KEY` repository secret.
 
 ## Forking & Continuing Development
 

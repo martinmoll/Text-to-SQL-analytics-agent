@@ -20,6 +20,13 @@ python -m evals.ablation evals/results/<baseline>.json evals/results/<candidate>
 Pass criterion: weighted score ≥ 0.5 per case (metric resolution 0.3, SQL
 pattern checks, execution, numeric accuracy within per-case tolerance).
 
+**CI baselines:** `results/resolution_baseline.json` is the regression gate
+for the free resolution-only CI job (compared on every push/PR — regenerate
+it with `--no-llm --save` and rename, whenever a change legitimately alters
+resolution behavior). The manually-triggered full-eval CI job gates against
+the newest committed `eval_*.json` — committing a new result file is how a
+new full-pipeline baseline is consciously accepted.
+
 ## Results Log
 
 | Date | Commit | Mode | Passed | Pass rate | Avg score | fund | mkt | port | ret | risk | Results file |

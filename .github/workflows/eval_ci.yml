@@ -1,17 +1,22 @@
-name: Eval Suite
+name: CI
+
+# Two-tier design:
+#   - Deterministic tier (unit tests + resolution-only evals): free, fast,
+#     no LLM calls — runs automatically on every push and PR. A red X here
+#     always means something real broke.
+#   - LLM tier (full agent evals): costs API credits and has run-to-run
+#     sampling variance — triggered manually from the Actions tab
+#     (workflow_dispatch). Requires the ANTHROPIC_API_KEY repository secret.
 
 on:
+  push:
+    branches: [main]
   pull_request:
-    paths:
-      - 'skills/**'
-      - 'semantic_layer/**'
-      - 'data/models/**'
-      - 'agent/**'
-      - 'evals/**'
+  workflow_dispatch:
 
 jobs:
-  eval-resolution:
-    name: Semantic Resolution Evals
+  tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -23,10 +28,34 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install pyyaml pandas
+        run: pip install -e .
+
+      - name: Run unit tests
+        run: python -m pytest tests/ -v
+
+  eval-resolution:
+    name: Semantic Resolution Evals (deterministic)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -e .
 
       - name: Run resolution-only evals
         run: python -m evals.run_evals --no-llm --verbose --save
+
+      - name: Check for regressions vs committed baseline
+        run: |
+          CANDIDATE=$(ls evals/results/eval_*.json | sort | tail -1)
+          echo "Comparing baseline resolution_baseline.json -> $CANDIDATE"
+          python -m evals.ablation evals/results/resolution_baseline.json "$CANDIDATE" --fail-on-regression
 
       - name: Upload eval results
         uses: actions/upload-artifact@v4
@@ -36,9 +65,9 @@ jobs:
           path: evals/results/
 
   eval-full:
-    name: Full Agent Evals
+    name: Full Agent Evals (manual — uses API credits)
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
+    if: github.event_name == 'workflow_dispatch'
 
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +78,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install duckdb yfinance anthropic pandas pyyaml
+        run: pip install -e .
 
       - name: Ingest test data
         run: python data/ingestion/ingest_prices.py
@@ -57,7 +86,16 @@ jobs:
       - name: Run full evals
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: python -m evals.run_evals --verbose --save
+        run: |
+          BASELINE=$(ls evals/results/eval_*.json | sort | tail -1)
+          echo "BASELINE=$BASELINE" >> "$GITHUB_ENV"
+          python -m evals.run_evals --verbose --save
+
+      - name: Check for regressions vs committed baseline
+        run: |
+          CANDIDATE=$(ls evals/results/eval_*.json | sort | tail -1)
+          echo "Comparing baseline $BASELINE -> $CANDIDATE"
+          python -m evals.ablation "$BASELINE" "$CANDIDATE" --fail-on-regression
 
       - name: Upload eval results
         uses: actions/upload-artifact@v4
@@ -65,13 +103,3 @@ jobs:
         with:
           name: eval-results-full
           path: evals/results/
-
-      - name: Check for regressions
-        if: hashFiles('evals/results/eval_*.json') != ''
-        run: |
-          RESULT_COUNT=$(ls evals/results/eval_*.json 2>/dev/null | wc -l)
-          if [ "$RESULT_COUNT" -ge 2 ]; then
-            python -m evals.ablation --fail-on-regression
-          else
-            echo "Not enough result files for ablation comparison — skipping"
-          fi
