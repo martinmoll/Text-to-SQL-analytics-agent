@@ -374,6 +374,12 @@ def main():
     parser.add_argument("--db", type=str, help="Path to DuckDB warehouse")
     parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed results")
     parser.add_argument("--save", action="store_true", help="Save results to JSON")
+    parser.add_argument(
+        "--fail-under", type=float, default=None, metavar="RATE",
+        help="Exit 1 if the pass rate falls below RATE (0.0-1.0). "
+             "Default: exit 0 whenever the run completes — regression "
+             "gating against a baseline is evals.ablation's job.",
+    )
     args = parser.parse_args()
 
     cases = load_fixtures(fixture_name=args.fixture, tags=args.tags)
@@ -408,8 +414,12 @@ def main():
         path = save_results(results)
         print(f"Results saved to {path}")
 
-    passed = sum(1 for r in results if r.passed)
-    sys.exit(0 if passed == len(results) else 1)
+    if args.fail_under is not None:
+        passed = sum(1 for r in results if r.passed)
+        rate = passed / len(results)
+        if rate < args.fail_under:
+            print(f"FAILED: pass rate {rate:.1%} is below threshold {args.fail_under:.1%}")
+            sys.exit(1)
 
 
 if __name__ == "__main__":
