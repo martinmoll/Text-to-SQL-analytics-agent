@@ -1,0 +1,1190 @@
+{
+  "timestamp": "2026-07-02T17:41:50.813966",
+  "total": 52,
+  "passed": 48,
+  "avg_score": 0.9091483516483516,
+  "results": [
+    {
+      "case_id": "fund_01",
+      "question": "What is AAPL's P/E ratio?",
+      "passed": true,
+      "score": 0.5,
+      "metric_match": null,
+      "actual_metric": "sharpe_ratio",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": [
+        "Expected agent to explain data is not available"
+      ]
+    },
+    {
+      "case_id": "fund_02",
+      "question": "Compare MSFT and GOOGL on EV/EBITDA",
+      "passed": false,
+      "score": 0.37499999999999994,
+      "metric_match": true,
+      "actual_metric": null,
+      "expected_metric": null,
+      "sql_generated": false,
+      "sql_contains_pass": [],
+      "sql_contains_fail": [],
+      "executed": false,
+      "row_count": 0,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": [
+        "Expected agent to explain data is not available"
+      ]
+    },
+    {
+      "case_id": "fund_03",
+      "question": "What is the dividend yield for JNJ?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": null,
+      "expected_metric": null,
+      "sql_generated": false,
+      "sql_contains_pass": [],
+      "sql_contains_fail": [],
+      "executed": false,
+      "row_count": 0,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "fund_04",
+      "question": "Show me the revenue growth for AMZN over the last 3 years",
+      "passed": false,
+      "score": 0.37499999999999994,
+      "metric_match": true,
+      "actual_metric": null,
+      "expected_metric": null,
+      "sql_generated": false,
+      "sql_contains_pass": [],
+      "sql_contains_fail": [],
+      "executed": false,
+      "row_count": 0,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": [
+        "Expected agent to explain data is not available"
+      ]
+    },
+    {
+      "case_id": "fund_05",
+      "question": "Which stock has the lowest price-to-book ratio?",
+      "passed": false,
+      "score": 0.37499999999999994,
+      "metric_match": true,
+      "actual_metric": null,
+      "expected_metric": null,
+      "sql_generated": false,
+      "sql_contains_pass": [],
+      "sql_contains_fail": [],
+      "executed": false,
+      "row_count": 0,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": [
+        "Expected agent to explain data is not available"
+      ]
+    },
+    {
+      "case_id": "mkt_01",
+      "question": "How did the S&P 500 perform in 2024?",
+      "passed": true,
+      "score": 0.625,
+      "metric_match": false,
+      "actual_metric": "beta",
+      "expected_metric": "cumulative_return",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "^GSPC",
+        "adjusted_close"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "mkt_02",
+      "question": "Compare the performance of all three indices in 2024",
+      "passed": false,
+      "score": 0.4666666666666667,
+      "metric_match": null,
+      "actual_metric": "cumulative_return",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "adjusted_close"
+      ],
+      "sql_contains_fail": [
+        "security_type",
+        "index"
+      ],
+      "executed": true,
+      "row_count": 3,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": [
+        "SQL missing expected pattern: security_type",
+        "SQL missing expected pattern: index"
+      ]
+    },
+    {
+      "case_id": "mkt_03",
+      "question": "Which stocks performed best in 2024?",
+      "passed": true,
+      "score": 0.8857142857142857,
+      "metric_match": null,
+      "actual_metric": "total_return_index",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "security_type",
+        "equity",
+        "ORDER BY"
+      ],
+      "sql_contains_fail": [
+        "adjusted_close"
+      ],
+      "executed": true,
+      "row_count": 21,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": [
+        "SQL missing expected pattern: adjusted_close"
+      ]
+    },
+    {
+      "case_id": "mkt_04",
+      "question": "What was the average return by sector in 2024?",
+      "passed": true,
+      "score": 0.8400000000000001,
+      "metric_match": null,
+      "actual_metric": "daily_simple_return",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "sector",
+        "GROUP BY",
+        "security_type",
+        "equity"
+      ],
+      "sql_contains_fail": [
+        "adjusted_close"
+      ],
+      "executed": true,
+      "row_count": 7,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": [
+        "SQL missing expected pattern: adjusted_close"
+      ]
+    },
+    {
+      "case_id": "mkt_05",
+      "question": "How did US stocks compare to Oslo Bors stocks in 2024?",
+      "passed": true,
+      "score": 0.8,
+      "metric_match": null,
+      "actual_metric": "beta",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "exchange",
+        "security_type",
+        "equity"
+      ],
+      "sql_contains_fail": [
+        "adjusted_close"
+      ],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": [
+        "SQL missing expected pattern: adjusted_close"
+      ]
+    },
+    {
+      "case_id": "mkt_06",
+      "question": "What percentage of stocks had positive returns in 2024?",
+      "passed": true,
+      "score": 0.7333333333333334,
+      "metric_match": null,
+      "actual_metric": "beta",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "security_type",
+        "equity"
+      ],
+      "sql_contains_fail": [
+        "adjusted_close"
+      ],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": [
+        "SQL missing expected pattern: adjusted_close"
+      ]
+    },
+    {
+      "case_id": "mkt_07",
+      "question": "Which sector was most volatile in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": null,
+      "actual_metric": "annualized_volatility",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "sector",
+        "STDDEV",
+        "daily_log_return",
+        "security_type",
+        "equity"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "mkt_08",
+      "question": "Show me a monthly return heatmap for all US stocks in 2024",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": null,
+      "actual_metric": "annualized_return",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "daily_log_return",
+        "month",
+        "security_type",
+        "equity"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 180,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "mkt_09",
+      "question": "What was the total volume traded for AAPL in Q1 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": null,
+      "actual_metric": "average_daily_volume",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "volume",
+        "AAPL",
+        "SUM"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "mkt_10",
+      "question": "Which stocks had the highest average daily volume in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "average_daily_volume",
+      "expected_metric": "average_daily_volume",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "AVG",
+        "volume",
+        "security_type",
+        "equity",
+        "ORDER BY"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 21,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "mkt_11",
+      "question": "What is the VWAP for NVDA in Q4 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "vwap",
+      "expected_metric": "vwap",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "adjusted_close",
+        "volume",
+        "NVDA"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "mkt_12",
+      "question": "How did the NASDAQ perform compared to the S&P 500 in Q1 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": null,
+      "actual_metric": "beta",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "^IXIC",
+        "^GSPC",
+        "adjusted_close"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 2,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "port_01",
+      "question": "How did AAPL perform relative to the S&P 500 in 2024?",
+      "passed": true,
+      "score": 0.7333333333333334,
+      "metric_match": null,
+      "actual_metric": "beta",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "AAPL",
+        "^GSPC"
+      ],
+      "sql_contains_fail": [
+        "adjusted_close"
+      ],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": [
+        "SQL missing expected pattern: adjusted_close"
+      ]
+    },
+    {
+      "case_id": "port_02",
+      "question": "Which stocks outperformed the S&P 500 in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": null,
+      "actual_metric": "beta",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "^GSPC",
+        "adjusted_close",
+        "security_type",
+        "equity"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 9,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "port_03",
+      "question": "What is the correlation between EQNR.OL and DNB.OL in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "correlation",
+      "expected_metric": "correlation",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "CORR",
+        "EQNR.OL",
+        "DNB.OL",
+        "daily_log_return"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "port_04",
+      "question": "Show me the most diversifying stock pair (lowest correlation) among US equities in 2024",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": null,
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "CORR",
+        "daily_log_return",
+        "security_type",
+        "equity"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "port_05",
+      "question": "What is the beta of Oslo Bors stocks relative to the S&P 500 in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "beta",
+      "expected_metric": "beta",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "REGR_SLOPE",
+        "^GSPC",
+        ".OL"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 6,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "port_06",
+      "question": "Compare the excess returns of tech stocks vs healthcare stocks over the S&P 500 in 2024",
+      "passed": true,
+      "score": 0.7333333333333334,
+      "metric_match": null,
+      "actual_metric": "beta",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "^GSPC",
+        "sector"
+      ],
+      "sql_contains_fail": [
+        "adjusted_close"
+      ],
+      "executed": true,
+      "row_count": 2,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": [
+        "SQL missing expected pattern: adjusted_close"
+      ]
+    },
+    {
+      "case_id": "port_07",
+      "question": "What is the correlation between JPM and V in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "correlation",
+      "expected_metric": "correlation",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "CORR",
+        "JPM",
+        "daily_log_return"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "port_08",
+      "question": "Rank all stocks by their risk-adjusted excess return over the S&P 500 in 2024",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": null,
+      "actual_metric": "daily_simple_return",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "^GSPC",
+        "security_type",
+        "equity"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 21,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "ret_01",
+      "question": "What was AAPL's cumulative return in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "cumulative_return",
+      "expected_metric": "cumulative_return",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "adjusted_close",
+        "AAPL",
+        "2024"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "ret_02",
+      "question": "Compare the cumulative returns of MSFT and GOOGL in Q1 2024",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "cumulative_return",
+      "expected_metric": "cumulative_return",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "MSFT",
+        "GOOGL",
+        "adjusted_close"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 2,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "ret_03",
+      "question": "What was TSLA's daily simple return on 2024-06-15?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "daily_simple_return",
+      "expected_metric": "daily_simple_return",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "daily_simple_return",
+        "TSLA"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 514,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "ret_04",
+      "question": "Show me the monthly returns for NVDA in 2024",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": null,
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "NVDA",
+        "daily_log_return",
+        "month"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 12,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "ret_05",
+      "question": "What were the cumulative returns of all US equities in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "cumulative_return",
+      "expected_metric": "cumulative_return",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "adjusted_close",
+        "security_type",
+        "equity"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 15,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "ret_06",
+      "question": "Calculate the annualized volatility of AAPL in 2024",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "annualized_volatility",
+      "expected_metric": "annualized_volatility",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "STDDEV",
+        "daily_log_return",
+        "252",
+        "AAPL"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "ret_07",
+      "question": "What was EQNR.OL's cumulative return in Q3 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "cumulative_return",
+      "expected_metric": "cumulative_return",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "EQNR.OL",
+        "adjusted_close",
+        "IS NOT NULL"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "ret_08",
+      "question": "Show the rolling 60-day volatility for MSFT in 2024",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": null,
+      "actual_metric": "annualized_volatility",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "STDDEV",
+        "OVER",
+        "PRECEDING",
+        "MSFT"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 245,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "ret_09",
+      "question": "What was the Sharpe ratio of AMZN in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "sharpe_ratio",
+      "expected_metric": "sharpe_ratio",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "daily_log_return",
+        "252",
+        "AMZN",
+        "STDDEV"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "ret_10",
+      "question": "Compare the Sharpe ratios of AAPL, MSFT, and GOOGL in 2024",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "sharpe_ratio",
+      "expected_metric": "sharpe_ratio",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "AAPL",
+        "MSFT",
+        "GOOGL",
+        "STDDEV",
+        "252"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 3,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "ret_11",
+      "question": "What was the Sortino ratio for META in 2024?",
+      "passed": true,
+      "score": 0.8333333333333333,
+      "metric_match": true,
+      "actual_metric": "sortino_ratio",
+      "expected_metric": "sortino_ratio",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "daily_log_return",
+        "META"
+      ],
+      "sql_contains_fail": [
+        "CASE WHEN"
+      ],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": [
+        "SQL missing expected pattern: CASE WHEN"
+      ]
+    },
+    {
+      "case_id": "ret_12",
+      "question": "What was TSLA's maximum drawdown in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "max_drawdown",
+      "expected_metric": "max_drawdown",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "TSLA",
+        "peak",
+        "MAX",
+        "MIN"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "ret_13",
+      "question": "Show cumulative returns for the Oslo Bors stocks in 2024",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "cumulative_return",
+      "expected_metric": "cumulative_return",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "adjusted_close",
+        "IS NOT NULL"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 0,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "ret_14",
+      "question": "Which stock had the highest annualized volatility in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "annualized_volatility",
+      "expected_metric": "annualized_volatility",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "STDDEV",
+        "252",
+        "security_type",
+        "equity"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "ret_15",
+      "question": "What was the annualized return for JPM over the last 3 years?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": null,
+      "actual_metric": "annualized_return",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "JPM",
+        "daily_log_return",
+        "252"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "risk_01",
+      "question": "What is the beta of AAPL relative to the S&P 500 in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "beta",
+      "expected_metric": "beta",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "REGR_SLOPE",
+        "AAPL",
+        "^GSPC",
+        "daily_log_return"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "risk_02",
+      "question": "Calculate the beta of all US equities vs S&P 500 in 2024",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "beta",
+      "expected_metric": "beta",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "REGR_SLOPE",
+        "^GSPC",
+        "security_type",
+        "equity"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 15,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "risk_03",
+      "question": "What is the correlation between AAPL and MSFT returns in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "correlation",
+      "expected_metric": "correlation",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "CORR",
+        "AAPL",
+        "MSFT",
+        "daily_log_return"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "risk_04",
+      "question": "What is the correlation between EQNR.OL and AAPL?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "correlation",
+      "expected_metric": "correlation",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "CORR",
+        "EQNR.OL",
+        "AAPL"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "risk_05",
+      "question": "Which stock had the highest beta in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "beta",
+      "expected_metric": "beta",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "REGR_SLOPE",
+        "^GSPC",
+        "security_type",
+        "equity"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 20,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "risk_06",
+      "question": "Show the maximum drawdown for all tech stocks in 2024",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "max_drawdown",
+      "expected_metric": "max_drawdown",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "peak",
+        "MAX",
+        "MIN",
+        "sector"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 3,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "risk_07",
+      "question": "What is NVDA's beta and R-squared vs S&P 500 in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "beta",
+      "expected_metric": "beta",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "REGR_SLOPE",
+        "REGR_R2",
+        "NVDA",
+        "^GSPC"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "risk_08",
+      "question": "Build a correlation matrix for AAPL, MSFT, GOOGL, AMZN, NVDA in 2024",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": null,
+      "actual_metric": "correlation",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "CORR",
+        "daily_log_return"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 15,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "risk_09",
+      "question": "What is the Sharpe ratio of EQNR.OL in 2024 using a 4% risk-free rate?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": true,
+      "actual_metric": "sharpe_ratio",
+      "expected_metric": "sharpe_ratio",
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "EQNR.OL",
+        "0.04",
+        "STDDEV",
+        "252"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "risk_10",
+      "question": "Compare the risk profiles (volatility, beta, max drawdown) of TSLA and JNJ in 2024",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": null,
+      "actual_metric": "annualized_volatility",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "TSLA",
+        "JNJ"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 2,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "risk_11",
+      "question": "Show the rolling 60-day beta of TSLA vs S&P 500",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": null,
+      "actual_metric": "beta",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "REGR_SLOPE",
+        "OVER",
+        "PRECEDING",
+        "TSLA",
+        "^GSPC"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 1218,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    },
+    {
+      "case_id": "risk_12",
+      "question": "What is the average beta by sector in 2024?",
+      "passed": true,
+      "score": 1.0,
+      "metric_match": null,
+      "actual_metric": "beta",
+      "expected_metric": null,
+      "sql_generated": true,
+      "sql_contains_pass": [
+        "REGR_SLOPE",
+        "sector",
+        "GROUP BY",
+        "security_type",
+        "equity"
+      ],
+      "sql_contains_fail": [],
+      "executed": true,
+      "row_count": 7,
+      "ground_truth": null,
+      "actual_value": null,
+      "within_tolerance": null,
+      "notes": []
+    }
+  ]
+}

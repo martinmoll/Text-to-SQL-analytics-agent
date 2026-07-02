@@ -26,3 +26,7 @@ Thumbs.db
 docs/*.tex
 docs/*.pdf
 !docs/demo.gif
+
+# Interview preparation notes (local only)
+PROJECT_HISTORY_SQLAGENT.md
+PROJECT_HISTORY.md
