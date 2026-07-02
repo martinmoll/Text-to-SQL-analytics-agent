@@ -30,3 +30,6 @@ docs/*.pdf
 # Interview preparation notes (local only)
 PROJECT_HISTORY_SQLAGENT.md
 PROJECT_HISTORY.md
+
+# BI exports (regenerate with data/ingestion/export_for_bi.py)
+data/exports/
