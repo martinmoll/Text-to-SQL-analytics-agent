@@ -6,10 +6,20 @@ name and parameters (tickers, date range, etc.), it produces a ready-to-run
 query against the warehouse.
 """
 
+import re
 import yaml
 from pathlib import Path
 from dataclasses import dataclass
 from datetime import date
+
+# Filler words ignored by lookup() scoring — keep this list conservative so
+# no finance vocabulary is ever dropped.
+_LOOKUP_STOPWORDS = {
+    "a", "an", "and", "are", "at", "be", "by", "did", "do", "does", "for",
+    "from", "had", "has", "have", "how", "in", "is", "it", "its", "me",
+    "of", "on", "or", "over", "per", "show", "than", "that", "the", "their",
+    "this", "to", "was", "were", "what", "when", "which", "who", "with",
+}
 
 
 SEMANTIC_DIR = Path(__file__).parent
@@ -255,13 +265,20 @@ GROUP BY a.ticker, b.ticker""".strip()
         raise ValueError(f"No join query template for metric '{metric_name}'")
 
     def lookup(self, question: str) -> list[dict]:
-        """Return metrics whose description or name matches keywords in the question."""
-        words = question.lower().split()
+        """Return metrics whose description or name matches keywords in the question.
+
+        Scores by whole-word token overlap (stopwords excluded) so that
+        filler words and substring accidents ("on" inside "only") don't
+        rank metrics. Tokens matching the metric NAME count double, which
+        breaks ties in favor of the metric the user literally named.
+        """
+        q_tokens = set(re.findall(r"[a-z0-9/&']+", question.lower())) - _LOOKUP_STOPWORDS
         results = []
         for name, defn in self.metrics.items():
-            desc = (defn.get("description", "") + " " + (defn.get("notes") or "")).lower()
-            name_lower = name.lower().replace("_", " ")
-            score = sum(1 for w in words if w in desc or w in name_lower)
+            text = (defn.get("description", "") + " " + (defn.get("notes") or "")).lower()
+            text_tokens = set(re.findall(r"[a-z0-9/&']+", text))
+            name_tokens = set(name.lower().split("_"))
+            score = len(q_tokens & text_tokens) + len(q_tokens & name_tokens)
             if score > 0:
                 results.append({
                     "name": name,

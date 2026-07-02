@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, timedelta
 
 from semantic_layer.compiler import SemanticCompiler, CompiledQuery
 
@@ -36,6 +36,9 @@ _PHRASE_MAP: dict[str, str] = {
     "corr": "correlation",
     "cumulative return": "cumulative_return",
     "total return": "total_return_index",
+    "annualized return": "annualized_return",
+    "annualised return": "annualized_return",
+    "annual return": "annualized_return",
     "simple return": "daily_simple_return",
     "log return": "daily_log_return",
     "volume": "average_daily_volume",
@@ -53,6 +56,7 @@ _ROUTE_KEYWORDS: dict[str, list[str]] = {
         "p/e", "pe ratio", "price-to-earnings", "earnings", "revenue",
         "margin", "ebitda", "dividend", "book value", "balance sheet",
         "fundamental", "valuation", "profit", "income", "debt", "peg",
+        "price-to-book", "price to book", "p/b", "eps", "cash flow",
     ],
     "references/portfolio_analytics.md": [
         "correlation", "beta", "portfolio", "diversif", "allocation",
@@ -80,6 +84,10 @@ _QUARTER_PATTERN = re.compile(
 
 _YEAR_PATTERN = re.compile(
     r"\b(20\d{2})\b"
+)
+
+_RELATIVE_PERIOD_PATTERN = re.compile(
+    r"\b(?:last|past|trailing)\s+(\d+)\s+(year|month|week)s?\b", re.IGNORECASE,
 )
 
 _PERIOD_KEYWORDS = {
@@ -194,6 +202,14 @@ class SemanticResolver:
             return dates[0], dates[1]
         if len(dates) == 1:
             return dates[0], None
+
+        rel_match = _RELATIVE_PERIOD_PATTERN.search(question)
+        if rel_match:
+            n, unit = int(rel_match.group(1)), rel_match.group(2).lower()
+            days_per_unit = {"year": 365, "month": 30, "week": 7}
+            end = date.today()
+            start = end - timedelta(days=n * days_per_unit[unit])
+            return start.isoformat(), end.isoformat()
 
         year_matches = _YEAR_PATTERN.findall(question)
         if year_matches:

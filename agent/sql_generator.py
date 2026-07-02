@@ -9,6 +9,7 @@ and domain-specific gotchas.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -26,6 +27,7 @@ class GeneratedSQL:
     reference_used: str | None
     tables_used: list[str]
     warnings: list[str]
+    declined: bool = False  # generator output NONE: required data not in warehouse
 
 
 _SYSTEM_PROMPT = """\
@@ -48,6 +50,14 @@ Always add AND fp.adjusted_close IS NOT NULL when using FIRST/LAST ordered aggre
 9. Use REGR_SLOPE / REGR_R2 / CORR for regression and correlation.
 10. Annualize with 252 trading days: volatility = STDDEV * SQRT(252), \
 return = AVG * 252.
+11. The warehouse contains ONLY price/volume data and security metadata. \
+There is NO fundamentals data: no earnings, revenue, margins, P/E, \
+price-to-book, book value, EPS, dividends, or balance sheet items. If the \
+question requires fundamentals data, do NOT invent a query. Still produce \
+all output sections, but write the literal text NONE under SQL: (instead of \
+a sql code block), and explain in REASONING that fundamentals data is not \
+available in the warehouse and which price-based metrics you could offer \
+instead.
 
 ## Database Schema
 
@@ -167,10 +177,14 @@ class SQLGenerator:
         reasoning = ""
         tables: list[str] = []
         warnings: list[str] = []
+        declined = False
 
         sql_block = _extract_between(text, "```sql", "```")
         if sql_block:
             sql = sql_block.strip()
+            if sql.upper() in ("NONE", "N/A"):
+                sql = ""
+                declined = True
         else:
             for line in text.split("\n"):
                 stripped = line.strip()
@@ -195,12 +209,17 @@ class SQLGenerator:
                 if table in sql:
                     tables.append(table)
 
+        if not sql and not declined and re.search(r"SQL:\s*`?NONE`?", text, re.IGNORECASE):
+            # Model declined without fencing NONE in a sql block
+            declined = True
+
         return GeneratedSQL(
             sql=sql,
             reasoning=reasoning,
             reference_used=reference_used,
             tables_used=tables,
             warnings=warnings,
+            declined=declined,
         )
 
 

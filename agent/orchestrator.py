@@ -45,6 +45,13 @@ If the question is clear enough to proceed, set needs_clarification to false \
 and fill in your best interpretation. Only ask for clarification if genuinely \
 ambiguous AND it would change the SQL significantly.
 
+The warehouse contains ONLY daily price/volume data and security metadata. \
+There is NO fundamentals data (no earnings, revenue, P/E, price-to-book, \
+EPS, dividends, balance sheet items). If the question requires fundamentals \
+data, do NOT ask for clarification — set needs_clarification to false and \
+pass the question through unchanged so the pipeline can explain the data is \
+not available.
+
 Available tickers: AAPL, MSFT, GOOGL, AMZN, NVDA, META, TSLA, JPM, V, JNJ, \
 PG, UNH, HD, MA, PFE (US); EQNR.OL, DNB.OL, MOWI.OL, ORK.OL, TEL.OL, \
 AKRBP.OL (Oslo Bors); ^GSPC, ^OEX, ^IXIC (indices).
@@ -101,8 +108,13 @@ class AnalyticsAgent:
 
         effective_question = clarification.get("interpreted_question", question)
 
-        # Step 2: RESOLVE — check semantic layer
-        resolution = self.resolver.resolve(effective_question)
+        # Step 2: RESOLVE — check semantic layer. Resolve against the user's
+        # original wording first: phrase matching is deterministic on it,
+        # while the LLM clarification may paraphrase away the exact metric
+        # phrase. Fall back to the clarified text only if the original misses.
+        resolution = self.resolver.resolve(question)
+        if not resolution.found and effective_question != question:
+            resolution = self.resolver.resolve(effective_question)
         trace.append({
             "step": "resolve",
             "found": resolution.found,
@@ -115,6 +127,7 @@ class AnalyticsAgent:
         tables_used: list[str]
         warnings: list[str] = []
         reasoning: str | None = None
+        declined: bool = False
         metric_name: str | None = None
         metric_description: str | None = None
         metric_notes: str | None = None
@@ -145,6 +158,7 @@ class AnalyticsAgent:
             tables_used = generated.tables_used or self._extract_tables(sql)
             warnings = generated.warnings
             reasoning = generated.reasoning
+            declined = generated.declined
             trace.append({
                 "step": "query",
                 "source": "llm_generated",
@@ -153,10 +167,22 @@ class AnalyticsAgent:
             })
 
         if not sql.strip():
+            # The generator declining (NONE) has exactly one meaning per its
+            # prompt: the required data is not in the warehouse. State that
+            # deterministically; the LLM reasoning adds the specifics.
+            if declined:
+                answer = "This question requires data that is not available in the warehouse."
+            else:
+                answer = (
+                    "Unable to generate a SQL query for this question — it "
+                    "likely requires data that is not available in the warehouse."
+                )
+            if reasoning and reasoning.strip():
+                answer = f"{answer}\n\n{reasoning.strip()}"
             return AgentResponse(
                 question=question,
-                answer="Unable to generate a SQL query for this question.",
-                methodology="The semantic layer had no coverage and SQL generation failed.",
+                answer=answer,
+                methodology="The semantic layer had no coverage and no SQL was generated.",
                 sql="",
                 warnings=["No SQL was generated"],
                 trace=trace,

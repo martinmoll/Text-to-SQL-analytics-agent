@@ -35,6 +35,15 @@ metrics:
     unit: ratio
     notes: "Useful for charting growth of a hypothetical investment over time."
 
+  annualized_return:
+    description: "Annualized geometric return from daily log returns: exp(avg daily log return * 252) - 1"
+    table: fact_daily_prices
+    expression: "EXP(AVG(daily_log_return) * 252) - 1"
+    requires_group_by: [ticker]
+    requires_filter: [date_range]
+    unit: ratio
+    notes: "Geometric annualization via log-return additivity, 252 trading days/year convention. AVG skips NULL first-day returns automatically. Requires a date range — avoid annualizing over all-time history."
+
   # ── Volatility Metrics ────────────────────────────────────────────────
 
   annualized_volatility:
