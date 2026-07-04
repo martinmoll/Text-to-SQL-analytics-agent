@@ -146,7 +146,7 @@ class AnalyticsAgent:
                 "metric": metric_name,
             })
         else:
-            # Steps 3-4: FIND + QUERY — route to reference doc, generate SQL
+            # Steps 3-4: FIND + QUERY — route to reference doc, and generate SQL
             generated = self.generator.generate(
                 question=effective_question,
                 route_hint=resolution.route_hint,
